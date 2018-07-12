@@ -1,6 +1,7 @@
 
 import React from 'react';
 import NovoPalpiteMaquinaEstados from './NovoPalpiteMaquinaEstados';
+import { Dropdown } from 'primereact/components/dropdown/Dropdown';
 
 
 class PalpiteForm extends React.Component {
@@ -12,9 +13,8 @@ class PalpiteForm extends React.Component {
             nome: '',
             telefone: '',
             dataDeNascimento: '',
-            campeao: '',
-            vice: '',
             confirmarSenha: '',
+            selected:{},
             estado: NovoPalpiteMaquinaEstados.inicio(),
             mensagem: 'Digite seu e-mail para dar início',
             mensagemClassName: 'alert alert-info',
@@ -30,8 +30,20 @@ class PalpiteForm extends React.Component {
                 vice: '',
                 confirmarSenha: '',
             },
+            selecoes : null,
         };
     }
+
+    async componentDidMount(){
+        const responseSelecoes = await fetch('http://localhost:8080/BolaoDaCopaV2RS/webresources/selecoes');
+        var contentTypeSelecoes = responseSelecoes.headers.get("content-type");
+        if (contentTypeSelecoes && contentTypeSelecoes.includes("application/json")) {
+            const selecoesJson = await responseSelecoes.json();
+            const selecoesOptions = selecoesJson.map((selecao) => { return { label: selecao, value: selecao }; });
+            selecoesOptions.unshift( { label: 'Escolha a seleção', value: null});
+            this.setState({ selecoes: selecoesOptions });
+        }
+   }
 
     handleUserInput(e) {
        const nome = e.target.name;
@@ -44,9 +56,34 @@ class PalpiteForm extends React.Component {
        });
    }
 
+   handleViceInput(e){
+      const nome = 'vice';
+      const valor = e.value;
+       let selected = this.state.selected;
+       const mensagensValidacao = Object.assign({}, this.state.mensagensValidacao);
+       selected[nome] = { value: valor };
+       mensagensValidacao[nome] = this.validarCampo({ nome, valor });
+       this.setState({ selected: selected,
+       mensagensValidacao, });
+   }
+
+   handleCampeaoInput(e){
+      const nome = 'campeao';
+      const valor = e.value;
+       let selected = this.state.selected;
+       const mensagensValidacao = Object.assign({}, this.state.mensagensValidacao);
+       selected[nome] = { value: valor };
+       mensagensValidacao[nome] = this.validarCampo({ nome, valor });
+       this.setState({ selected: selected,
+       mensagensValidacao, });
+   }
 
    validarCampo({ nome, valor = null }) {
        if (valor === null) {
+           if(nome === 'campeao' || nome === 'vice'){
+              valor = this.state.selected[nome];
+            }
+          else
            valor = this.state[nome];
        }
 
@@ -63,15 +100,26 @@ class PalpiteForm extends React.Component {
                    return 'Senha muito curta';
                }
            }
-       } else if (nome === 'vice') {
-           if (valor.length === 0) {
+       }else if (nome === 'campeao') {
+           if (valor == null) {
+               return 'Campeão não pode ser vazio';
+           }
+           else if(valor.value == null){
+               return 'Campeão não pode ser vazio';
+             }
+
+       }
+        else if (nome === 'vice') {
+           if (valor == null) {
                return 'Vice não pode ser vazio';
            }
-           if (valor === this.state.campeao) {
+           else if(valor.value == null)
+               return 'Vice não pode ser vazio';
+           if (valor.value === this.state.selected.campeao.value) {
                return 'Campeão e vice não podem ser iguais';
            }
        }
-       else if (nome === 'nome' || nome === 'telefone' || nome === 'dataDeNascimento' || nome === 'campeao') {
+       else if (nome === 'nome' || nome === 'telefone' || nome === 'dataDeNascimento') {
            if (valor === '') {
                return 'Não pode ser vazio';
            }
@@ -171,8 +219,8 @@ class PalpiteForm extends React.Component {
         this.mostrarAjaxLoader();
         try {
             const novoPalpite = {
-                campeao: this.state.campeao,
-                vice: this.state.vice,
+                campeao: this.state.selected.campeao.value,
+                vice: this.state.selected.vice.value,
                 palpiteiro: {
                     id: null,
                 }
@@ -213,8 +261,7 @@ class PalpiteForm extends React.Component {
                 nome: '',
                 telefone: '',
                 dataDeNascimento: '',
-                campeao: '',
-                vice: '',
+                selected: {},
                 confirmarSenha: '',
                 usuarioEncontrado: null,
             });
@@ -278,6 +325,7 @@ class PalpiteForm extends React.Component {
                                     disabled={this.state.estado.camposDadosPessoaisDesabilitados}
                                     value={this.state.nome}
                                     onChange={(event) => this.handleUserInput(event)}/>
+                                <span className="text text-danger">{this.state.mensagensValidacao['nome']}</span>
                             </div>
                         </div>
                         <div className="form-group">
@@ -290,6 +338,7 @@ class PalpiteForm extends React.Component {
                                     disabled={this.state.estado.camposDadosPessoaisDesabilitados}
                                     value={this.state.telefone}
                                     onChange={(event) => this.handleUserInput(event)}/>
+                                <span className="text text-danger">{this.state.mensagensValidacao['telefone']}</span>
                             </div>
                             <label className="col-sm-3 control-label" htmlFor="dataDeNascimento">Data de nascimento</label>
                             <div className="col-sm-3">
@@ -301,6 +350,7 @@ class PalpiteForm extends React.Component {
                                     value={this.state.dataDeNascimento}
                                     onChange={(event) => this.handleUserInput(event)}>
                                 </input>
+                            <span className="text text-danger">{this.state.mensagensValidacao['dataDeNascimento']}</span>
                             </div>
                         </div>
 
@@ -308,13 +358,14 @@ class PalpiteForm extends React.Component {
                         <div className={this.state.estado.camposDadosPalpiteDestaque ? 'form-group has-success' : 'form-group'}>
                             <label className="col-sm-2 control-label" htmlFor="campeao">Campeão</label>
                             <div className="col-sm-4">
-                                <input type="text"
-                                    className="form-control"
-                                    name="campeao"
-                                    label="Campeão"
-                                    disabled={this.state.estado.camposDadosPalpiteDesabilitados}
-                                    value={this.state.campeao}
-                                    onChange={(event) => this.handleUserInput(event)} />
+                            <Dropdown style={{ width: '100%' }}
+                                 name="campeao"
+                                 className="ui-column-filter"
+                                 disabled={this.state.estado.camposDadosPalpiteDesabilitados}
+                                 value={this.state.selected.campeao ? this.state.selected.campeao.value : null}
+                                 options={this.state.selecoes}
+                                 onChange={(event) => this.handleCampeaoInput(event)}  />
+                             <span className="text text-danger">{this.state.mensagensValidacao['campeao']}</span>
                             </div>
                             {this.state.estado.campoConfirmacaoSenhaVisivel && (
                                 <label className="col-sm-2 control-label" htmlFor="confirmarSenha">Confirme a senha</label>
@@ -335,13 +386,14 @@ class PalpiteForm extends React.Component {
                         <div className={this.state.estado.camposDadosPalpiteDestaque ? 'form-group has-success' : 'form-group'}>
                             <label className="col-sm-2 control-label" htmlFor="vice">Vice</label>
                             <div className="col-sm-4">
-                                <input type="text"
-                                    className="form-control"
-                                    name="vice"
-                                    label="Vice"
-                                    disabled={this.state.estado.camposDadosPalpiteDesabilitados}
-                                    value={this.state.vice}
-                                    onChange={(event) => this.handleUserInput(event)} />
+                            <Dropdown style={{ width: '100%' }}
+                                 name="vice"
+                                 className="ui-column-filter"
+                                 disabled={this.state.estado.camposDadosPalpiteDesabilitados}
+                                 value={this.state.selected.vice ? this.state.selected.vice.value : null}
+                                 options={this.state.selecoes}
+                                 onChange={(event) => this.handleViceInput(event)}  />
+                             <span className="text text-danger">{this.state.mensagensValidacao['vice']}</span>
                             </div>
                             <div className="col-sm-6">
                                {this.state.estado.botaoConfirmarPalpiteVisivel && (

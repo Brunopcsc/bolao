@@ -31,6 +31,7 @@ public class ApplicationConfig extends Application {
     private void addRestResourceClasses(Set<Class<?>> resources) {
         resources.add(br.ufscar.dc.bolao2.servicos.CorsResponseFilter.class);
         resources.add(br.ufscar.dc.bolao2.servicos.ServicosPalpite.class);
+        resources.add(br.ufscar.dc.bolao2.servicos.ServicosSelecao.class);
         resources.add(br.ufscar.dc.bolao2.servicos.ServicosUsuario.class);
     }
     
