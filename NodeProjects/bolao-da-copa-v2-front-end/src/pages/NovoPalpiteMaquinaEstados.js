@@ -104,6 +104,19 @@ class NovoPalpiteMaquinaEstados {
             botaoConfirmarPalpiteVisivel: true,
         };
     }
+
+    static usuarioMaxPalpite() {
+        return {
+            campoSenhaDesabilitado: true,
+            eventoSenhaDesabilitado: true,
+            camposDadosPessoaisDesabilitados: true,
+            camposDadosPalpiteDesabilitados: true,
+            camposDadosPalpiteDestaque: false,
+            botaoEnvioDesabilitado: true,
+            campoConfirmacaoSenhaVisivel: false,
+            botaoConfirmarPalpiteVisivel: false,
+        };
+    }
 }
 
 

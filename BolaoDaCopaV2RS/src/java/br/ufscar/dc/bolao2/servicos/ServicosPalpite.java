@@ -13,6 +13,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -46,6 +47,19 @@ public class ServicosPalpite {
         simularDemora();
         try {
             return Response.ok(palpiteDao.listarTodasSelecoes()).build();
+        } catch (SQLException ex) {
+            Logger.getLogger(ServicosPalpite.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.serverError().build();
+        }
+    }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/quantidade")
+    public Response getQuantidade(@QueryParam("email") String email) {
+        simularDemora();
+        try {
+            return Response.ok(palpiteDao.quantidadePalpites(email)).build();
         } catch (SQLException ex) {
             Logger.getLogger(ServicosPalpite.class.getName()).log(Level.SEVERE, null, ex);
             return Response.serverError().build();

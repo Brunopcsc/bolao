@@ -113,11 +113,8 @@ class PalpiteForm extends React.Component {
             var contentType = response.headers.get("content-type");
             if (contentType && contentType.includes("application/json")) {
                 const usuarioJson = await response.json();
-                this.setState({
-                    estado: NovoPalpiteMaquinaEstados.usuarioExistente(),
-                    usuarioEncontrado: usuarioJson
-                });
-                this.mostrarAviso('E-mail já cadastrado! Informe sua senha para enviar o palpite');
+                this.setState({usuarioEncontrado: usuarioJson});
+                this.validarNumeroPalpites();
             } else {
                 this.setState({ estado: NovoPalpiteMaquinaEstados.usuarioInexistente() });
                 this.mostrarInfo('E-mail ainda não cadastrado! Informe uma nova senha e demais dados para cadastro');
@@ -126,7 +123,29 @@ class PalpiteForm extends React.Component {
             this.mostrarErro('Ocorreu um problema!');
             console.log(e);
         }
-        this.ocultarAjaxLoader();
+    }
+
+    async validarNumeroPalpites(){
+        try{
+            const responseQuantidadePalpites = await fetch('http://localhost:8080/BolaoDaCopaV2RS/webresources/palpite/quantidade?email=' + this.state.email);
+            var contentTypeQuantidadePalpites = responseQuantidadePalpites.headers.get("content-type");
+            if (contentTypeQuantidadePalpites && contentTypeQuantidadePalpites.includes("application/json")) {
+                const quantidadePalpitesJson = await responseQuantidadePalpites.json();
+                if (parseInt(quantidadePalpitesJson, 10) >= 3){
+                    this.setState({ estado: NovoPalpiteMaquinaEstados.usuarioMaxPalpite() });
+                    this.mostrarErro('Você já fez 3 palpites!');
+                    this.ocultarAjaxLoader();
+                    return true;
+                }
+                this.setState({ estado: NovoPalpiteMaquinaEstados.usuarioExistente() });
+                this.mostrarAviso('E-mail já cadastrado! Informe sua senha para enviar o palpite');
+                this.ocultarAjaxLoader();
+                return false;
+            }
+        } catch (e) {
+            this.mostrarErro('Ocorreu um problema!');
+            console.log(e);
+        }
     }
 
     handleSenhaChanged() {

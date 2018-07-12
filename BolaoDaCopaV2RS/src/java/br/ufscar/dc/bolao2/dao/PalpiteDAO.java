@@ -40,6 +40,12 @@ public class PalpiteDAO {
             + " select vice as selecao from palpite) selecoes"
             + " order by upper(selecao)";
 
+    private final static String QUANTIDADE_PALPITE_SQL = "select"
+            + " count (p.palpiteiro)"
+            + " from Palpite p"
+            + " join Usuario u on p.palpiteiro = u.id"
+            + " where u.email = (?)";
+
     @Resource(name = "jdbc/Bolao2DBLocal")
     DataSource dataSource;
 
@@ -82,6 +88,21 @@ public class PalpiteDAO {
             }
         }
         return ret;
+    }
+    
+    public int quantidadePalpites(String email) throws SQLException {
+        int quantidade =0;
+        try (Connection con = dataSource.getConnection();
+                PreparedStatement ps = con.prepareStatement(QUANTIDADE_PALPITE_SQL, Statement.RETURN_GENERATED_KEYS);) {
+            ps.setString(1, email);
+            ps.execute();
+
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                quantidade = rs.getInt(1);
+            }
+        }
+        return quantidade;
     }
 
     public List<String> listarTodasSelecoes() throws SQLException {
