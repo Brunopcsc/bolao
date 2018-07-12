@@ -30,17 +30,14 @@ class PalpiteForm extends React.Component {
                 vice: '',
                 confirmarSenha: '',
             },
-            validacaoBorda:{
-                email: 'blue',
-                senha: 'blue',
-                nome: 'blue',
-                telefone: 'blue',
-                dataDeNascimento: 'blue',
-                campeao: 'blue',
-                vice: 'blue',
-                confirmarSenha: 'blue',
-            },
-            inputEmail: 'red,'
+            inputEmail: 'blue,',
+            inputSenha: 'blue',
+            inputNome: 'blue',
+            inputDataNascimento: 'blue',
+            inputCampeao: 'blue',
+            inputVice: 'blue',
+            inputConfirmarSenha: 'blue',
+            inputCampeao: 'blue',
         };
     }
 
@@ -72,29 +69,66 @@ class PalpiteForm extends React.Component {
            }
        } else if (nome === 'senha') {
            if (valor.length === 0) {
+               this.setState({inputSenha: 'red'});
                return 'Senha não pode ser vazia';
            } else if (this.state.usuarioEncontrado === null) {
                if (valor.length < 6) {
+                   this.setState({inputSenha: 'red'});
                    return 'Senha muito curta';
                }
            }
+           this.setState({inputSenha: 'blue'});
+
        } else if (nome === 'vice') {
            if (valor.length === 0) {
+               this.setState({inputVice: 'red'});
                return 'Vice não pode ser vazio';
            }
-           if (valor === this.state.campeao) {
+           else if (valor === this.state.campeao) {
+               this.setState({inputVice: 'red'});
                return 'Campeão e vice não podem ser iguais';
            }
-       }
-       else if (nome === 'nome' || nome === 'telefone' || nome === 'dataDeNascimento' || nome === 'campeao') {
-           if (valor === '') {
-               return 'Não pode ser vazio';
+           else{
+             this.setState({inputVice: 'blue'});
            }
+       }
+       //else if (nome === 'nome' || nome === 'telefone' || nome === 'dataDeNascimento' || nome === 'campeao') {
+       else if( nome =='nome'){
+            if (valor === '') {
+                this.setState({inputNome: 'red'});
+                 return 'Não pode ser vazio';
+            }
+            else{
+                this.setState({inputNome: 'blue'});
+            }
+      }
+      else if(nome=='telefone'){
+            if (valor === '') {
+                this.setState({inputTelefone: 'red'});
+                return 'Não pode ser vazio';
+            }
+            else{
+              this.setState({inputTelefone: 'blue'});
+            }
+      }
+      else if(nome=="dataDeNascimento"){
+            if (valor === '') {
+              this.setState({inputDataNascimento: 'red'});
+              return 'Não pode ser vazio';
+            }
+            else{
+              this.setState({inputDataNascimento: 'blue'});
+            }
+
        } else if (nome === 'confirmarSenha') {
            if (this.state.usuarioEncontrado === null && this.state.estado.botaoConfirmarPalpiteVisivel) {
                const senha = this.state.senha;
                if (valor !== senha) {
+                   this.setState({inputConfirmarSenha: 'red'});
                    return 'Confirmação da senha não confere';
+               }
+               else{
+                 this.setState({inputConfirmarSenha: 'blue'});
                }
            }
        }
