@@ -30,6 +30,17 @@ class PalpiteForm extends React.Component {
                 vice: '',
                 confirmarSenha: '',
             },
+            validacaoBorda:{
+                email: 'blue',
+                senha: 'blue',
+                nome: 'blue',
+                telefone: 'blue',
+                dataDeNascimento: 'blue',
+                campeao: 'blue',
+                vice: 'blue',
+                confirmarSenha: 'blue',
+            },
+            inputEmail: 'red,'
         };
     }
 
@@ -53,7 +64,11 @@ class PalpiteForm extends React.Component {
 
        if (nome === 'email') {
            if (!/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/.test(valor)) {
+               this.setState({inputEmail: 'red'});
                return 'E-mail está em formato incorreto';
+           }
+           else{
+              this.setState({inputEmail: 'blue'})
            }
        } else if (nome === 'senha') {
            if (valor.length === 0) {
@@ -252,6 +267,7 @@ class PalpiteForm extends React.Component {
                                  label="E-mail"
                                  value={this.state.email}
                                  onChange={(event) => this.handleUserInput(event)}
+                                 style={{borderColor: this.state.inputEmail}}
                                  onBlur={() => this.handleEmailChanged()} />
                              <span className="text text-danger">{this.state.mensagensValidacao['email']}</span>
                             </div>
